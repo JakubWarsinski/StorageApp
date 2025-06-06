@@ -23,9 +23,11 @@ def get_single_element(sql, params=None):
     conn.close()
     return element
 
-def insert_element(sql, params):
+def run_element(sql, params):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute(sql, params)
     conn.commit()
+    last_id = cursor.lastrowid
     conn.close()
+    return last_id

@@ -24,14 +24,21 @@ class Setup:
         cursor = conn.cursor()
 
         cursor.execute("""
+            CREATE TABLE Kategorie (
+            KategoriaID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Nazwa TEXT)
+        """)
+
+        cursor.execute("""
             CREATE TABLE Produkty (
             ProduktID INTEGER PRIMARY KEY AUTOINCREMENT,
             Nazwa TEXT NOT NULL,
-            Kategoria TEXT,
+            KategoriaID INTEGER,
             Cena REAL,
             Ilosc INTEGER DEFAULT 0,
             LokalizacjaID INTEGER,
-            FOREIGN KEY (LokalizacjaID) REFERENCES Magazyn(MagazynID));
+            FOREIGN KEY (LokalizacjaID) REFERENCES Magazyn(MagazynID),
+            FOREIGN KEY (KategoriaID) REFERENCES Kategorie(KategoriaID));
         """)
 
         cursor.execute("""
@@ -62,16 +69,6 @@ class Setup:
         """)
 
         cursor.execute("""
-            CREATE TABLE LokalizacjaProduktu (
-            LokalizacjaID INTEGER PRIMARY KEY AUTOINCREMENT,
-            ProduktID INTEGER,
-            MagazynID INTEGER,
-            Ilosc INTEGER,
-            FOREIGN KEY (ProduktID) REFERENCES Produkty(ProduktID),
-            FOREIGN KEY (MagazynID) REFERENCES Magazyn(MagazynID));
-        """)
-
-        cursor.execute("""
             CREATE TABLE OperacjeMagazynowe (
             OperacjaID INTEGER PRIMARY KEY AUTOINCREMENT,
             ProduktID INTEGER,
@@ -87,171 +84,171 @@ class Setup:
     def InsertVariables(conn):
         cursor = conn.cursor()
         
-        klienci = [
-            ("Anna", "Nowak", "anna@example.com"),
-            ("Jan", "Kowalski", "jan@example.com"),
-            ("Kasia", "Wiśniewska", "kasia@example.com"),
+        customers = [
+            ("Anna", "Nowak", "anna.nowak@example.com"),
+            ("Jan", "Kowalski", "jan.kowalski@example.com"),
+            ("Katarzyna", "Wiśniewska", "k.wisniewska@example.com"),
+            ("Piotr", "Zieliński", "piotr.zielinski@example.com"),
+            ("Magdalena", "Wójcik", "magda.wojcik@example.com"),
+            ("Tomasz", "Kamiński", "t.kaminski@example.com"),
+            ("Agnieszka", "Lewandowska", "agnieszka.lewandowska@example.com"),
+            ("Michał", "Dąbrowski", "michal.dabrowski@example.com"),
+            ("Paulina", "Mazur", "paulina.mazur@example.com"),
+            ("Marcin", "Jankowski", "marcin.jankowski@example.com"),
         ]
 
-        magazyny = [
+        storages = [
             ("Regał A", 100),
             ("Regał B", 150),
+            ("Regał C", 200),
+            ("Regał D", 120),
+            ("Regał E", 140),
+            ("Regał F", 160),
+            ("Regał G", 180),
+            ("Regał H", 150)
         ]
 
-        produkty = [
-            ("Laptop Lenovo IdeaPad", "Elektronika", 3200.0, 15),
-            ("Mysz Logitech", "Akcesoria", 299.0, 40),
-            ("Papier A4 x500", "Biuro", 25.0, 100),
-            ("Drukarka HP Inkjet", "Elektronika", 450.0, 10),
-            ("Kabel HDMI 2m", "Akcesoria", 19.0, 70),
-            ("Monitor Dell 24\"", "Elektronika", 799.0, 12),
-            ("Długopis żelowy", "Biuro", 3.5, 500),
-            ("Tusz do drukarki", "Biuro", 79.0, 30),
-            ("Zeszyt A5", "Szkoła", 2.5, 300),
-            ("Plecak Xiaomi", "Akcesoria", 129.0, 20),
-            ("Karta SD 64GB", "Elektronika", 55.0, 25),
-            ("Etui na telefon", "Akcesoria", 29.0, 50),
-            ("Powerbank", "Elektronika", 99.0, 15),
-            ("Notes A4", "Biuro", 18.0, 40),
-            ("Klawiatura", "Elektronika", 259.0, 10),
-            ("Torba na laptopa", "Akcesoria", 89.0, 18),
-            ("Taśma pakowa", "Magazyn", 7.0, 200),
-            ("Lampka LED", "Biuro", 45.0, 35),
-            ("Słuchawki JBL", "Elektronika", 169.0, 8),
-            ("Mata pod mysz", "Akcesoria", 39.0, 60),
-            ("Pendrive 32GB", "Elektronika", 29.0, 75),
-            ("Tablet Wacom", "Elektronika", 329.0, 5),
-            ("Papier kolorowy", "Biuro", 19.0, 60),
-            ("Ramka 10x15", "Dom", 12.0, 40),
-            ("Markery 12 kolorów", "Biuro", 22.0, 35),
-            ("Pojemnik na dokumenty", "Biuro", 16.0, 30),
-            ("Kalkulator", "Szkoła", 49.0, 20),
-            ("Głośnik Bluetooth", "Elektronika", 189.0, 10),
-            ("Zasilacz", "Elektronika", 99.0, 12),
-            ("Mikrofon USB", "Elektronika", 159.0, 6),
+        categories = [
+            ("Elektronika",),
+            ("Akcesoria",),
+            ("Biuro",),
+            ("Szkoła",),
+            ("Magazyn",),
+            ("Dom",)
         ]
 
-        cursor.executemany("INSERT INTO Klienci (Imie, Nazwisko, Email) VALUES (?, ?, ?);", klienci)
-        cursor.executemany("INSERT INTO Produkty (Nazwa, Kategoria, Cena, Ilosc) VALUES (?, ?, ?, ?);", produkty)
-        cursor.executemany("INSERT INTO Magazyn (Nazwa, MaksymalnaPojemnosc, AktualnaIlosc) VALUES (?, ?, 0)", magazyny)
+        products = [
+            ("Laptop Lenovo IdeaPad", 1, 3200.0, 15, 1),
+            ("Mysz Logitech", 2, 299.0, 40, 1),
+            ("Papier A4 x500", 3, 25.0, 45, 1),
 
+            ("Drukarka HP Inkjet", 1, 450.0, 10, 2),
+            ("Kabel HDMI 2m", 2, 19.0, 70, 2),
+            ("Monitor Dell 24\"", 1, 799.0, 12, 2),
+            ("Długopis żelowy", 3, 3.5, 58, 2),
+
+            ("Tusz do drukarki", 3, 79.0, 30, 3),
+            ("Zeszyt A5", 4, 2.5, 90, 3),
+            ("Plecak Xiaomi", 2, 129.0, 20, 3),
+            ("Karta SD 64GB", 1, 55.0, 60, 3),
+
+            ("Etui na telefon", 2, 29.0, 50, 4),
+            ("Powerbank", 1, 99.0, 15, 4),
+            ("Notes A4", 3, 18.0, 40, 4),
+            ("Klawiatura", 1, 259.0, 10, 4),
+            ("Torba na laptopa", 2, 89.0, 5, 4),
+
+            ("Taśma pakowa", 5, 7.0, 100, 5),
+            ("Lampka LED", 3, 45.0, 35, 5),
+            ("Słuchawki JBL", 1, 169.0, 5, 5),
+
+            ("Mata pod mysz", 2, 39.0, 60, 6),
+            ("Pendrive 32GB", 1, 29.0, 75, 6),
+            ("Tablet Wacom", 1, 329.0, 10, 6),
+            ("Papier kolorowy", 3, 19.0, 15, 6),
+
+            ("Ramka 10x15", 6, 12.0, 40, 7),
+            ("Markery 12 kolorów", 3, 22.0, 35, 7),
+            ("Pojemnik na dokumenty", 3, 16.0, 30, 7),
+            ("Kalkulator", 4, 49.0, 20, 7),
+            ("Głośnik Bluetooth", 1, 189.0, 15, 7),
+            ("Zasilacz", 1, 99.0, 20, 7),
+
+            ("Mikrofon USB", 1, 159.0, 6, 8),
+        ]
+
+        cursor.executemany("INSERT INTO Kategorie (Nazwa) VALUES (?)", categories)
+        cursor.executemany("INSERT INTO Klienci (Imie, Nazwisko, Email) VALUES (?, ?, ?);", customers)
+        cursor.executemany("INSERT INTO Produkty (Nazwa, KategoriaID, Cena, Ilosc, LokalizacjaID) VALUES (?, ?, ?, ?, ?);", products)
+        cursor.executemany("INSERT INTO Magazyn (Nazwa, MaksymalnaPojemnosc, AktualnaIlosc) VALUES (?, ?, 0)", storages)
+        
         conn.commit()
 
-    def GenerateOperations(conn):
+    def GenerateOperations(self):
+        conn = sqlite3.connect(dbPath)
         cursor = conn.cursor()
 
         TOTAL_OPERATIONS = 600
 
-        produkt_ids = [row[0] for row in cursor.execute("SELECT ProduktID FROM Produkty").fetchall()]
-        magazyny_ids = [row[0] for row in cursor.execute("SELECT MagazynID FROM Magazyn").fetchall()]
+        product_ids = [row[0] for row in cursor.execute("SELECT ProduktID FROM Produkty").fetchall()]
+        customer_ids = [row[0] for row in cursor.execute("SELECT KlientID FROM Klienci").fetchall()]
+        storage_ids = [row[0] for row in cursor.execute("SELECT MagazynID FROM Magazyn").fetchall()]
 
-        cursor.execute("SELECT ProduktID, Ilosc FROM Produkty")
-        produkt_stan = {row[0]: row[1] for row in cursor.fetchall()}
+        amount_of_deliverys = int(TOTAL_OPERATIONS * 0.21)
+        amount_of_orders = int(TOTAL_OPERATIONS * 0.35)
+        amount_of_returns = int(TOTAL_OPERATIONS * 0.09)
 
-        cursor.execute("SELECT MagazynID, AktualnaIlosc FROM Magazyn")
-        magazyn_stan = {row[0]: row[1] for row in cursor.fetchall()}
+        total = TOTAL_OPERATIONS - (amount_of_deliverys + amount_of_orders + amount_of_returns)
 
-        cursor.execute("SELECT ProduktID, MagazynID, Ilosc FROM LokalizacjaProduktu")
+        list_of_operations = []
+        list_of_orders = []
 
-        lokalizacja_stan = {}
-        
-        for pid, mid, ilosc in cursor.fetchall():
-            lokalizacja_stan[(pid, mid)] = ilosc
+        # dostawy (21% = 126)
+        for _ in range(amount_of_deliverys):
+            amount = random.randint(10, 40)
+            product_id = random.choice(product_ids)
+            date = (datetime.now() - timedelta(days=random.randint(0, 10000))).strftime("%d-%m-%Y")
 
-        operacje_do_dodania = []
-        zamowienia = []
+            list_of_operations.append((product_id, "Dostawa", date, amount, "Dostawa towaru"))
 
-        conn.execute("BEGIN")
+        # zamówienia (35% = 210)
+        for _ in range(amount_of_orders):
+            amount = random.randint(10, 40)
+            product_id = random.choice(product_ids)
+            customer_id = random.choice(customer_ids)
+            date = datetime.now() - timedelta(days=random.randint(0, 10000))
+            days = random.randint(1, 14)
+            date_after_succes = (date + timedelta(days=days)).strftime("%d-%m-%Y")
 
-        num_dostawy = int(TOTAL_OPERATIONS * 0.21)
-        for _ in range(num_dostawy):
-            produkt_id = random.choice(produkt_ids)
-            ilosc = random.randint(10, 50)
-            data_obj = datetime.now() - timedelta(days=random.randint(0, 10000))
-            magazyn_id = random.choice(magazyny_ids)
+            date = date.strftime("%d-%m-%Y")
 
-            produkt_stan[produkt_id] = produkt_stan.get(produkt_id, 0) + ilosc
-            magazyn_stan[magazyn_id] = magazyn_stan.get(magazyn_id, 0) + ilosc
-            lokalizacja_stan[(produkt_id, magazyn_id)] = lokalizacja_stan.get((produkt_id, magazyn_id), 0) + ilosc
+            list_of_orders.append((customer_id, product_id, amount, date))
 
-            operacje_do_dodania.append((produkt_id, "Dostawa", data_obj, ilosc, "Dostawa towaru"))
+            list_of_operations.append((product_id, "Zamówienie", date, amount, "Zamówienie klienta"))
+            list_of_operations.append((product_id, "Wysyłka", date_after_succes, amount, "Wysyłka zgodna z zamówieniem"))
 
-        num_zamowienia = int(TOTAL_OPERATIONS * 0.35)
-        przyjete_zamowienia = 0
+        # Zwroty (9% = 54)
+        for _ in range(amount_of_returns):
+            amount = random.randint(10, 40)
+            product_id = random.choice(product_ids)
+            date = (datetime.now() - timedelta(days=random.randint(0, 10000))).strftime("%d-%m-%Y")
 
-        while przyjete_zamowienia < num_zamowienia:
-            produkt_id = random.choice(produkt_ids)
-            ilosc = random.randint(1, 20)
-            data_obj = datetime.now() - timedelta(days=random.randint(0, 10000))
+            list_of_operations.append((product_id, "Zwrot", date, amount, "Zwrot od klienta"))
 
-            if produkt_stan.get(produkt_id, 0) < ilosc:
-                continue
+        # Zwroty (9% = 54)
+        for _ in range(amount_of_returns):
+            amount = random.randint(10, 40)
+            product_id = random.choice(product_ids)
+            date = (datetime.now() - timedelta(days=random.randint(0, 10000))).strftime("%d-%m-%Y")
 
-            magazyny_z_produktami = [(mid, ilosc_stan) for (pid, mid), ilosc_stan in lokalizacja_stan.items() if pid == produkt_id and ilosc_stan >= ilosc]
-            if not magazyny_z_produktami:
-                continue
+            list_of_operations.append((product_id, "Reklamacja", date, amount, "Reklamacja – usunięcie"))
 
-            magazyn_id, _ = max(magazyny_z_produktami, key=lambda x: x[1])
+        # Dodatkowa dostawa (reszta)
+        for _ in range(total):
+            amount = random.randint(10, 40)
+            product_id = random.choice(product_ids)
+            date = (datetime.now() - timedelta(days=random.randint(0, 10000))).strftime("%d-%m-%Y")
 
-            produkt_stan[produkt_id] -= ilosc
-            lokalizacja_stan[(produkt_id, magazyn_id)] -= ilosc
-            magazyn_stan[magazyn_id] -= ilosc
+            list_of_operations.append((product_id, "Dostawa", date, amount, "Dodatkowa dostawa"))
 
-            operacje_do_dodania.append((produkt_id, "Zamówienie", data_obj, ilosc, "Zamówienie klienta"))
-            zamowienia.append((produkt_id, ilosc, data_obj))
-            przyjete_zamowienia += 1
+        for product_id, type, date, amount, description in list_of_operations:
+            cursor.execute("""
+                INSERT INTO OperacjeMagazynowe (ProduktID, TypOperacji, DataOperacji, Ilosc, Uwagi)
+                VALUES (?, ?, ?, ?, ?)
+            """, (product_id, type, date, amount, description))
 
-        for produkt_id, ilosc, data_zamowienia in zamowienia:
-            dni_po_zamowieniu = random.randint(1, 14)
-            data_obj = data_zamowienia + timedelta(days=dni_po_zamowieniu)
+        for customer_id, product_id, amount, date in list_of_orders:
+            cursor.execute("""
+                INSERT INTO Zamowienia (KlientID, ProduktID, Ilosc, DataZamowienia)
+                VALUES (?, ?, ?, ?)
+            """, (customer_id, product_id, amount, date))
 
-            operacje_do_dodania.append((produkt_id, "Wysyłka", data_obj, ilosc, "Wysyłka zgodna z zamówieniem"))
+        for id in storage_ids:
+            cursor.execute("SELECT SUM(Ilosc) as ilosc FROM Produkty WHERE LokalizacjaID = ?", (id,))
+            row = cursor.fetchone()
+            product_amount = row[0]
 
-        num_zwroty = num_reklamacje = int(TOTAL_OPERATIONS * 0.09 / 2)
+            cursor.execute("UPDATE Magazyn SET AktualnaIlosc = ? WHERE MagazynID = ?", (product_amount, id))
 
-        for _ in range(num_zwroty):
-            produkt_id = random.choice(produkt_ids)
-            ilosc = random.randint(1, 10)
-            data_obj = datetime.now() - timedelta(days=random.randint(0, 10000))
-
-            produkt_stan[produkt_id] = produkt_stan.get(produkt_id, 0) + ilosc
-            operacje_do_dodania.append((produkt_id, "Zwrot", data_obj, ilosc, "Zwrot od klienta"))
-
-        for _ in range(num_reklamacje):
-            produkt_id = random.choice(produkt_ids)
-            ilosc = random.randint(1, 10)
-            data_obj = datetime.now() - timedelta(days=random.randint(0, 10000))
-
-            if produkt_stan.get(produkt_id, 0) >= ilosc:
-                produkt_stan[produkt_id] -= ilosc
-                operacje_do_dodania.append((produkt_id, "Reklamacja", data_obj, ilosc, "Reklamacja – usunięcie"))
-
-        while len(operacje_do_dodania) < TOTAL_OPERATIONS:
-            produkt_id = random.choice(produkt_ids)
-            ilosc = random.randint(1, 20)
-            data_obj = datetime.now() - timedelta(days=random.randint(0, 10000))
-            magazyn_id = random.choice(magazyny_ids)
-
-            produkt_stan[produkt_id] = produkt_stan.get(produkt_id, 0) + ilosc
-            magazyn_stan[magazyn_id] = magazyn_stan.get(magazyn_id, 0) + ilosc
-            lokalizacja_stan[(produkt_id, magazyn_id)] = lokalizacja_stan.get((produkt_id, magazyn_id), 0) + ilosc
-
-            operacje_do_dodania.append((produkt_id, "Dostawa", data_obj, ilosc, "Dodatkowa dostawa"))
-
-        cursor.executemany("UPDATE Produkty SET Ilosc = ? WHERE ProduktID = ?", [(ilosc, pid) for pid, ilosc in produkt_stan.items()])
-        cursor.executemany("UPDATE Magazyn SET AktualnaIlosc = ? WHERE MagazynID = ?", [(ilosc, mid) for mid, ilosc in magazyn_stan.items()])
-
-        for (pid, mid), ilosc in lokalizacja_stan.items():
-            cursor.execute("SELECT 1 FROM LokalizacjaProduktu WHERE ProduktID = ? AND MagazynID = ?", (pid, mid))
-            if cursor.fetchone():
-                cursor.execute("UPDATE LokalizacjaProduktu SET Ilosc = ? WHERE ProduktID = ? AND MagazynID = ?", (ilosc, pid, mid))
-            else:
-                cursor.execute("INSERT INTO LokalizacjaProduktu (ProduktID, MagazynID, Ilosc) VALUES (?, ?, ?)", (pid, mid, ilosc))
-
-        operacje_do_dodania.sort(key=lambda x: x[2])
-        cursor.executemany("""
-            INSERT INTO OperacjeMagazynowe (ProduktID, TypOperacji, DataOperacji, Ilosc, Uwagi)
-            VALUES (?, ?, ?, ?, ?)
-        """, [(pid, typ, data.strftime("%Y-%m-%d"), ilosc, uwagi) for pid, typ, data, ilosc, uwagi in operacje_do_dodania])
 
         conn.commit()

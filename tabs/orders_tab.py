@@ -96,9 +96,10 @@ class OrdersTab:
         customer_id = self.customer_map[customer]
         product_id = self.product_map[product]
 
-        current_date = datetime.now().strftime("%Y-%m-%d")
+        current_date = datetime.now().strftime("%d-%m-%Y")
 
-        product_amount = db.get_single_element("SELECT Ilosc FROM Produkty WHERE ProduktID = ?;", [product_id])
+        product_amount = int(db.get_single_element("SELECT Ilosc FROM Produkty WHERE ProduktID = ?;", [product_id]))
+        storage_id = db.get_single_element("SELECT LokalizacjaID FROM Produkty WHERE ProduktID = ?;", [product_id])
 
         new_amount = product_amount - amount
 
@@ -106,16 +107,22 @@ class OrdersTab:
             messagebox.showerror("Błąd", "Podana ilość jest większa niż ilość dostępnych produktów!")
             return
         
-        db.insert_element("UPDATE Produkty SET Ilosc = ? WHERE ProduktID = ?;", [new_amount, product_id])
+        storage_amount = int(db.get_single_element("SELECT AktualnaIlosc FROM Magazyn WHERE MagazynID = ?", [storage_id]))
+        
+        storage_amount = storage_amount - amount
 
-        db.insert_element("""
+        db.run_element("UPDATE Magazyn SET AktualnaIlosc = ? WHERE MagazynID = ?", [storage_amount, storage_id])
+
+        db.run_element("UPDATE Produkty SET Ilosc = ? WHERE ProduktID = ?;", [new_amount, product_id])
+
+        db.run_element("""
             INSERT INTO Zamowienia (KlientID, ProduktID, Ilosc, DataZamowienia) 
             VALUES (?, ?, ?, ?)
             """,
             (customer_id, product_id, amount, current_date)
         )
 
-        db.insert_element("""
+        db.run_element("""
             INSERT INTO OperacjeMagazynowe (ProduktID, TypOperacji, DataOperacji, Ilosc, Uwagi) 
             VALUES (?, ?, ?, ?, ?)
             """,
