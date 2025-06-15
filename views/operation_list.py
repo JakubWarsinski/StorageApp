@@ -17,10 +17,10 @@ class OperationList:
         main_frame.pack(fill="both", expand=True)
 
         self.sql = """
-            SELECT tp.id_operacji, pr.nazwa, op.nazwa, tp.ilosc, tp.uwagi, tp.data_utworzenia
-            FROM operacje_magazynowe tp
-            JOIN produkty pr ON pr.id_produktu = tp.id_produktu
-            JOIN typy_operacji op ON op.id_typ_operacji = tp.id_typ_operacji
+            SELECT op.id_operacji, pr.nazwa, tp.nazwa, op.ilosc, op.uwagi, op.data_utworzenia
+            FROM operacje_magazynowe op
+            JOIN produkty pr ON pr.id_produktu = op.id_produktu
+            JOIN typy_operacji tp ON tp.id_typ_operacji = op.id_typ_operacji
         """
 
         create_header(main_frame)
@@ -28,61 +28,60 @@ class OperationList:
         content_frame = tk.Frame(main_frame)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
 
-        self.table = create_table(content_frame, ["ID", "NAZWA", "TYP", "ILOŚĆ", "UWAGI", "DATA"], 13)
+        self.table = create_table(content_frame, ["ID", "PRODUKT", "TYP", "ILOŚĆ", "UWAGI", "DATA UTWORZENIA"], 14)
         
         inner_frame = tk.Frame(content_frame)
-        inner_frame.pack(fill="x")
+        inner_frame.pack(fill="x", pady=(30, 0))
 
         enrty_frame = tk.Frame(inner_frame)
-        enrty_frame.pack(anchor="center", pady=30)
+        enrty_frame.pack(anchor="center")
 
-        self.id_entry = create_entry_with_label(enrty_frame, "ID", 5)
-        
-        self.name_entry = create_entry_with_label(enrty_frame, "NAZWA", 15)
+        self.id_entry = create_entry_with_label(enrty_frame, "ID", width=5, side="left", padx=(0, 20))
        
-        self.type_entry, self.type_map = create_combobox_with_label(enrty_frame, "TYP", "SELECT id_typ_operacji, nazwa FROM typy_operacji;", 15)
-
-        self.amount_entry = create_entry_with_label(enrty_frame, "ILOŚĆ", 5)
+        self.product_entry, self.product_map = create_combobox_with_label(enrty_frame, "PRODUKT", "SELECT id_produktu, nazwa FROM produkty;", width=15, side="left", padx=(0, 20))
         
-        self.description_entry = create_entry_with_label(enrty_frame, "UWAGI", 15)
+        self.type_entry, self.type_map = create_combobox_with_label(enrty_frame, "TYP", "SELECT id_typ_operacji, nazwa FROM typy_operacji;", width=15, side="left", padx=(0, 20))
 
-        self.date_from_entry = create_date_with_label(enrty_frame, "DATA OD", 12)
+        self.amount_entry = create_entry_with_label(enrty_frame, "ILOŚĆ", width=5, side="left", padx=(0, 20))
 
-        self.date_to_entry = create_date_with_label(enrty_frame, "DATA DO", 12)
+        self.description_entry = create_entry_with_label(enrty_frame, "UWAGI", width=20, side="left", padx=(0, 20))
+        
+        self.date_from_entry = create_date_with_label(enrty_frame, "DATA OD", width=12, side="left", padx=(0, 20))
+
+        self.date_to_entry = create_date_with_label(enrty_frame, "DATA DO", width=12, side="left")
 
         inner_frame = tk.Frame(content_frame)
-        inner_frame.pack(fill="x")
+        inner_frame.pack(fill="x", pady=(30, 0))
 
         button_frame = tk.Frame(inner_frame)
         button_frame.pack(anchor="center")
 
-        create_button(button_frame, "ZNAJDŹ", self.button_find, 10)
-        create_button(button_frame, "WYCZYŚĆ", self.button_clear, 10)
+        create_button(button_frame, "ZNAJDŹ", self.button_find, width=10, side="left", style="ButtonsNormal.TButton", padx=(0, 20))
+        create_button(button_frame, "WYCZYŚĆ", self.button_clear, width=10, side="left", style="ButtonsNormal.TButton")
 
         load_table(self.table, self.sql)
 
+
     def button_clear(self):
         self.id_entry.delete(0, 'end')
-        self.name_entry.delete(0, 'end')
         self.description_entry.delete(0, 'end')
         self.amount_entry.delete(0, 'end')
         self.date_from_entry.entry.delete(0, 'end')
         self.date_to_entry.entry.delete(0, 'end')
+        self.product_entry.current(0)
         self.type_entry.current(0)
 
         load_table(self.table, self.sql)
 
+
     def button_find(self):
         id = self.id_entry.get()
-        name = self.name_entry.get()
         description = self.description_entry.get()
         amount = self.amount_entry.get()
+        product = self.product_map[self.product_entry.get()]
         type = self.type_map[self.type_entry.get()]
         date_from = self.date_from_entry.entry.get()
         date_to = self.date_to_entry.entry.get()
-
-        date_from = re.sub(r"[^\d]", "-", date_from)
-        date_to = re.sub(r"[^\d]", "-", date_to)
 
         where = "WHERE 1=1"
         params = []
@@ -95,40 +94,37 @@ class OperationList:
                 messagebox.showerror("BŁĄD", "Pole ID musi być liczbą!")
                 return
 
-            where += " AND tp.id_operacji = ?"
+            where += " AND op.id_operacji = ?"
             params.append(id)
 
-        if name:
-            where += " AND pr.nazwa LIKE ? COLLATE NOCASE"
-            params.append(f"%{name}%")
-
         if description:
-            where += " AND tp.uwagi LIKE ? COLLATE NOCASE"
+            where += " AND op.uwagi LIKE ? COLLATE NOCASE"
             params.append(f"%{description}%")
 
         if amount:
             try:
-                amount = float(amount)
+                amount = int(amount)
                 
             except ValueError:
                 messagebox.showerror("BŁĄD", "Pole ILOŚĆ musi być liczbą!")
                 return
 
-            where += " AND tp.ilosc <= ?"
+            where += " AND op.ilosc <= ?"
             params.append(amount)
+
+        if product != 0:
+            where += " AND pr.id_produktu = ?"
+            params.append(product)
 
         if type != 0:
             where += " AND tp.id_typ_operacji = ?"
             params.append(type)
 
         if date_from and date_to:
-            where += " AND DATE(tp.data_utworzenia) BETWEEN ? AND ?"
+            where += " AND DATE(op.data_utworzenia) BETWEEN ? AND ?"
             
-            normalized_date_from = datetime.strptime(date_from, "%d-%m-%Y").strftime("%Y-%m-%d")
-            normalized_date_to = datetime.strptime(date_to, "%d-%m-%Y").strftime("%Y-%m-%d")
-            
-            params.append(normalized_date_from)
-            params.append(normalized_date_to)
+            params.append(date_from)
+            params.append(date_to)
 
         sql = self.sql
 

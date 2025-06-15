@@ -10,6 +10,8 @@ def register_view():
     from views.product_list import ProductList
     from views.category_list import CategoryList
     from views.operation_list import OperationList
+    from views.rank_list import RankList
+    from views.charts import Charts
 
     global view_list
 
@@ -19,7 +21,9 @@ def register_view():
         "storage_list": [StorageList, "Lista regałów"],
         "product_list": [ProductList, "Lista produktów"],
         "category_list": [CategoryList, "Lista kategorii"],
-        "operation_list": [OperationList, "Lista operacjii"]        
+        "operation_list": [OperationList, "Lista operacjii"],
+        "rank_list": [RankList, "Ranking produktów"],
+        "charts": [Charts, "Wykresy"]
     }
 
 def change_view(name, *params):
@@ -33,4 +37,8 @@ def change_view(name, *params):
         widget.destroy()
 
     view_class = view_list[name][0]
+    view_name = view_list[name][1]
+
+    root.title(view_name)
+
     view_class(root, *params)

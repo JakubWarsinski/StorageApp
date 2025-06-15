@@ -24,6 +24,6 @@ if __name__ == "__main__":
 
     router.root = root 
     router.register_view()
-    router.change_view("product_list")
+    router.change_view("storage_list")
 
     root.mainloop()

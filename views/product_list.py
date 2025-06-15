@@ -12,6 +12,7 @@ from utils.create_inputs import (
     create_date_with_label
 )
 
+
 class ProductList:
     def __init__(self, root, *args):
         main_frame = tk.Frame(root)
@@ -29,41 +30,42 @@ class ProductList:
         content_frame = tk.Frame(main_frame)
         content_frame.pack(fill="both", expand=True, padx=30, pady=30)
 
-        self.table = create_table(content_frame, ["ID", "NAZWA", "KATEGORIA", "CENA", "ILOŚĆ", "REGAŁ", "DATA DODANIA"], 13)
+        self.table = create_table(content_frame, ["ID", "NAZWA", "KATEGORIA", "CENA", "ILOŚĆ", "REGAŁ", "DATA DODANIA"], 14)
         
         inner_frame = tk.Frame(content_frame)
-        inner_frame.pack(fill="x")
+        inner_frame.pack(fill="x", pady=(30, 0))
 
         enrty_frame = tk.Frame(inner_frame)
-        enrty_frame.pack(anchor="center", pady=30)
+        enrty_frame.pack(anchor="center")
 
-        self.id_entry = create_entry_with_label(enrty_frame, "ID", 5)
+        self.id_entry = create_entry_with_label(enrty_frame, "ID", width=5, side="left", padx=(0, 20))
         
-        self.name_entry = create_entry_with_label(enrty_frame, "NAZWA", 15)
+        self.name_entry = create_entry_with_label(enrty_frame, "NAZWA", width=15, side="left", padx=(0, 20))
        
-        self.category_entry, self.category_map = create_combobox_with_label(enrty_frame, "KATEGORIA", "SELECT id_kategori, nazwa FROM kategorie;", 15)
+        self.category_entry, self.category_map = create_combobox_with_label(enrty_frame, "KATEGORIA", "SELECT id_kategori, nazwa FROM kategorie;", width=15, side="left", padx=(0, 20))
         
-        self.price_entry = create_entry_with_label(enrty_frame, "CENA", 5)
+        self.price_entry = create_entry_with_label(enrty_frame, "CENA", width=5, side="left", padx=(0, 20))
 
-        self.amount_entry = create_entry_with_label(enrty_frame, "ILOŚĆ", 5)
+        self.amount_entry = create_entry_with_label(enrty_frame, "ILOŚĆ", width=5, side="left", padx=(0, 20))
         
-        self.regale_entry, self.regale_map = create_combobox_with_label(enrty_frame, "REGAŁ", "SELECT id_magazynu, nazwa FROM magazyn;", 15)
+        self.regale_entry, self.regale_map = create_combobox_with_label(enrty_frame, "REGAŁ", "SELECT id_magazynu, nazwa FROM magazyn;", width=15, side="left", padx=(0, 20))
 
-        self.date_from_entry = create_date_with_label(enrty_frame, "DATA OD", 12)
+        self.date_from_entry = create_date_with_label(enrty_frame, "DATA OD", width=12, side="left", padx=(0, 20))
 
-        self.date_to_entry = create_date_with_label(enrty_frame, "DATA DO", 12)
+        self.date_to_entry = create_date_with_label(enrty_frame, "DATA DO", width=12, side="left")
 
         inner_frame = tk.Frame(content_frame)
-        inner_frame.pack(fill="x")
+        inner_frame.pack(fill="x", pady=(30, 0))
 
         button_frame = tk.Frame(inner_frame)
         button_frame.pack(anchor="center")
 
-        create_button(button_frame, "DODAJ", self.button_add, 10)
-        create_button(button_frame, "ZNAJDŹ", self.button_find, 10)
-        create_button(button_frame, "WYCZYŚĆ", self.button_clear, 10)
+        create_button(button_frame, "DODAJ", self.button_add, width=10, side="left", style="ButtonsNormal.TButton", padx=(0, 20))
+        create_button(button_frame, "ZNAJDŹ", self.button_find, width=10, side="left", style="ButtonsNormal.TButton", padx=(0, 20))
+        create_button(button_frame, "WYCZYŚĆ", self.button_clear, width=10, side="left", style="ButtonsNormal.TButton")
 
         load_table(self.table, self.sql)
+
 
     def button_clear(self):
         self.id_entry.delete(0, 'end')
@@ -76,6 +78,7 @@ class ProductList:
         self.regale_entry.current(0)
 
         load_table(self.table, self.sql)
+
 
     def button_add(self):
         name = self.name_entry.get()
@@ -143,6 +146,7 @@ class ProductList:
 
         messagebox.showinfo("UDANE", f"Dodano nowy produkt:\nId: {product_id}\nNazwa: {name}\nData: {now}")
 
+
     def button_find(self):
         id = self.id_entry.get()
         name = self.name_entry.get()
@@ -152,9 +156,6 @@ class ProductList:
         regale = self.regale_map[self.regale_entry.get()]
         date_from = self.date_from_entry.entry.get()
         date_to = self.date_to_entry.entry.get()
-
-        date_from = re.sub(r"[^\d]", "-", date_from)
-        date_to = re.sub(r"[^\d]", "-", date_to)
 
         where = "WHERE 1=1"
         params = []
@@ -187,7 +188,7 @@ class ProductList:
 
         if amount:
             try:
-                amount = float(amount)
+                amount = int(amount)
                 
             except ValueError:
                 messagebox.showerror("BŁĄD", "Pole ILOŚĆ musi być liczbą!")
@@ -207,11 +208,8 @@ class ProductList:
         if date_from and date_to:
             where += " AND DATE(pr.data_dodania) BETWEEN ? AND ?"
             
-            normalized_date_from = datetime.strptime(date_from, "%d-%m-%Y").strftime("%Y-%m-%d")
-            normalized_date_to = datetime.strptime(date_to, "%d-%m-%Y").strftime("%Y-%m-%d")
-            
-            params.append(normalized_date_from)
-            params.append(normalized_date_to)
+            params.append(date_from)
+            params.append(date_to)
 
         sql = self.sql
 

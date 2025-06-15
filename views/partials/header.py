@@ -16,6 +16,8 @@ def create_header(parent, *args):
         ["PRODUKTY", "product_list"],
         ["KATEGORIE", "category_list"],
         ["OPERACJE", "operation_list"],
+        ["RANKING PRODUTKÓW", "rank_list"],
+        ["WYKRESY", "charts"],
     ]
 
     for text, path in button_list:

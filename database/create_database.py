@@ -139,7 +139,10 @@ class CreateDatabase:
             ["Regał I", 300, 260],
             ["Regał J", 500, 435],
             ["Regał K", 230, 228],
-            ["Regał L", 250, 175]
+            ["Regał L", 250, 175],
+            ["Regał M", 250, 0],
+            ["Regał N", 250, 0],
+            ["Regał O", 250, 0]
         ]
 
         product_categories = [
