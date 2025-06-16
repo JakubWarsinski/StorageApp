@@ -91,13 +91,13 @@ class Charts(tk.Tk):
         if chart_type == "Słupkowy":
             ax.bar(labels, values, color='skyblue')
             ax.set_title("Wykres słupkowy")
-            ax.set_xticks(range(len(labels)))  # ustawia ticki na pozycje 0, 1, 2, ...
+            ax.set_xticks(range(len(labels)))
             ax.set_xticklabels(labels, rotation=45, ha='right')
         elif chart_type == "Kołowy":
             ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=140)
             ax.set_title("Wykres kołowy")
 
-        fig.tight_layout()  # <====== KLUCZOWA LINIJKA
+        fig.tight_layout()
 
         for widget in self.chart_frame.winfo_children():
             widget.destroy()
